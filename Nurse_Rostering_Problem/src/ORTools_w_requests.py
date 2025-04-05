@@ -38,7 +38,7 @@ def generate_nurse_preference_matrices(num_nurses, num_days, num_shifts=3):
             shift_requests[n][day][shift] = 1
     
     # Generate day off requests
-    # Each nurse will request 1-2 days off per week
+    # Each nurse will request 1-2 days off per period
     for n in range(num_nurses):
         # Determine how many days off this nurse will request
         num_days_off = random.randint(1, 2)
@@ -48,7 +48,7 @@ def generate_nurse_preference_matrices(num_nurses, num_days, num_shifts=3):
         while days_assigned < num_days_off:
             day = random.randint(0, num_days - 1)
             # Only assign if not already assigned
-            if day_off_requests[n][day] == 0:
+            if day_off_requests[n][day] == 0 and shift_requests[n][day].count(1) == 0:
                 day_off_requests[n][day] = 1
                 days_assigned += 1
     
@@ -230,13 +230,57 @@ def main() -> None:
             df_numeric = df.applymap(lambda x: shift_to_num.get(x, 3))
             
             # Define colors for each shift type
-            colors = ['#8dd3c7', '#ffffb3', '#bebada', '#f0f0f0']
+            colors = ['#f0f0f0', '#f0f0f0', '#f0f0f0', '#f0f0f0']
             cmap = ListedColormap(colors)
             
             # Plot the heatmap
             plt.figure(figsize=(10, 6))
-            sns.heatmap(df_numeric, annot=df, fmt='', cmap=cmap, cbar=False, linewidths=.5)
+            ax = sns.heatmap(df_numeric, cmap=cmap, cbar=False, linewidths=.5)
             plt.title(f"Optimal Schedule (Objective Value: {self._best_objective})")
+
+            # Loop over the DataFrame to add annotations with conditional colors
+            for i in range(df_numeric.shape[0]):       # iterate over nurses (rows)
+                for j in range(df_numeric.shape[1]):   # iterate over days (columns)
+                    # Get the letter for the current cell
+                    letter = df.iloc[i, j]
+            
+                    # Determine the color based on the conditions:
+                    if day_off_requests[i][j] == 1:
+                        if letter == '-':
+                            cell_color = 'green'
+                        else:
+                            cell_color = 'orange'
+                    else:
+                        # Map letter to its shift index (M=0, E=1, N=2)
+                        if letter == 'M':
+                            shift_index = 0
+                        elif letter == 'E':
+                            shift_index = 1
+                        elif letter == 'N':
+                            shift_index = 2
+                        else:
+                            shift_index = None
+                        
+                        if shift_requests[i][j]==[0,0,0]:
+                            cell_color = 'grey'
+                        elif shift_index is None:
+                            cell_color = 'orange'
+                        # If the nurse requested the assigned shift, set the cell to green.
+                        elif shift_requests[i][j][shift_index] == 1:
+                            cell_color = 'green'
+                        else:
+                            cell_color = 'orange'
+                    
+                    # Create and add a rectangle patch for the cell.
+                    # Note: The heatmap grid coordinates start at (0,0) at the top left.
+                    rect = plt.Rectangle((j, i), 1, 1, facecolor=cell_color,
+                                        edgecolor='white', lw=0.5, alpha=0.6)
+                    ax.add_patch(rect)
+                    
+                    # Optionally, overlay the shift letter on top of the colored cell.
+                    # Here, we choose white text for better contrast on dark backgrounds.
+                    ax.text(j + 0.5, i + 0.5, letter, ha='center', va='center', color='white')
+
             plt.show()
 
         def solution_count(self):
