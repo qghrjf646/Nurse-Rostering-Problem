@@ -6,12 +6,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import openai
 import json
+import os
 
 # Define constants that will be used throughout the notebook
 shift_names = ["Morning", "Evening", "Night"]
-
-import openai
-import json
 
 def collect_nurse_rostering_parameters():
     # System message: instruct the assistant on its role and output format.
@@ -42,7 +40,7 @@ def collect_nurse_rostering_parameters():
     messages = [system_message]
 
     # Set your API key
-    openai.api_key = "insert_key"
+    openai.api_key = os.getenv("OPENAI_API_KEY")
 
     print("Please answer the assistant's questions as naturally as possible.\n")
     
@@ -163,7 +161,7 @@ def visualize_requests():
     if shift_data:
         df = pd.DataFrame(shift_data, columns=["Nurse", "Day", "Shift"])
         table = pd.crosstab(df["Nurse"], [df["Day"], df["Shift"]])
-        sns.heatmap(table.notna(), cmap="Blues", cbar=False)
+        sns.heatmap(table, cmap="Blues", cbar=False, annot=True, fmt="d")
         plt.title("Shift Requests")
     else:
         plt.text(0.5, 0.5, "No shift requests", ha="center", va="center")
@@ -363,13 +361,57 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
         df_numeric = df.applymap(lambda x: shift_to_num.get(x, 3))
         
         # Define colors for each shift type
-        colors = ['#8dd3c7', '#ffffb3', '#bebada', '#f0f0f0']
+        colors = ['#f0f0f0', '#f0f0f0', '#f0f0f0', '#f0f0f0']
         cmap = ListedColormap(colors)
         
         # Plot the heatmap
         plt.figure(figsize=(10, 6))
-        sns.heatmap(df_numeric, annot=df, fmt='', cmap=cmap, cbar=False, linewidths=.5)
+        ax = sns.heatmap(df_numeric, cmap=cmap, cbar=False, linewidths=.5)
         plt.title(f"Optimal Schedule (Objective Value: {self._best_objective})")
+
+        # Loop over the DataFrame to add annotations with conditional colors
+        for i in range(df_numeric.shape[0]):       # iterate over nurses (rows)
+            for j in range(df_numeric.shape[1]):   # iterate over days (columns)
+                # Get the letter for the current cell
+                letter = df.iloc[i, j]
+        
+                # Determine the color based on the conditions:
+                if day_off_requests[i][j] == 1:
+                    if letter == '-':
+                        cell_color = 'green'
+                    else:
+                        cell_color = 'orange'
+                else:
+                    # Map letter to its shift index (M=0, E=1, N=2)
+                    if letter == 'M':
+                        shift_index = 0
+                    elif letter == 'E':
+                        shift_index = 1
+                    elif letter == 'N':
+                        shift_index = 2
+                    else:
+                        shift_index = None
+                    
+                    if shift_requests[i][j]==[0,0,0]:
+                        cell_color = 'grey'
+                    elif shift_index is None:
+                        cell_color = 'orange'
+                    # If the nurse requested the assigned shift, set the cell to green.
+                    elif shift_requests[i][j][shift_index] == 1:
+                        cell_color = 'green'
+                    else:
+                        cell_color = 'orange'
+                
+                # Create and add a rectangle patch for the cell.
+                # Note: The heatmap grid coordinates start at (0,0) at the top left.
+                rect = plt.Rectangle((j, i), 1, 1, facecolor=cell_color,
+                                    edgecolor='white', lw=0.5, alpha=0.6)
+                ax.add_patch(rect)
+                
+                # Optionally, overlay the shift letter on top of the colored cell.
+                # Here, we choose white text for better contrast on dark backgrounds.
+                ax.text(j + 0.5, i + 0.5, letter, ha='center', va='center', color='white')
+
         plt.show()
 
     def solution_count(self):
