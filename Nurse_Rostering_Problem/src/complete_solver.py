@@ -376,7 +376,9 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
                 letter = df.iloc[i, j]
         
                 # Determine the color based on the conditions:
-                if day_off_requests[i][j] == 1:
+                if day_off_requests is None:
+                    cell_color = 'grey'
+                elif day_off_requests[i][j] == 1:
                     if letter == '-':
                         cell_color = 'green'
                     else:
@@ -391,8 +393,9 @@ class SolutionPrinter(cp_model.CpSolverSolutionCallback):
                         shift_index = 2
                     else:
                         shift_index = None
-                    
-                    if shift_requests[i][j]==[0,0,0]:
+                    if shift_requests is None:
+                        cell_color = 'grey'
+                    elif shift_requests[i][j]==[0,0,0]:
                         cell_color = 'grey'
                     elif shift_index is None:
                         cell_color = 'orange'
