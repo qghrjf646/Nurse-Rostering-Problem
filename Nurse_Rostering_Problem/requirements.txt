@@ -45,3 +45,8 @@ traitlets==5.14.3
 typing_extensions==4.13.0
 tzdata==2025.2
 wcwidth==0.2.13
+
+
+openai==0.28
+matplotlib==3.10.1
+seaborn==0.12.2
