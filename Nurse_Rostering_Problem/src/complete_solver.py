@@ -64,7 +64,7 @@ def collect_nurse_rostering_parameters():
             print("Error extracting reply:", e)
             continue
 
-        print("Assistant:", reply)
+        print("Assistant:", "\033[33m" + reply + '\033[0m')
         messages.append({"role": "assistant", "content": reply})
 
         # If the assistant signals that all parameters are collected with "PARAMETERS:" prefix, break the loop.
