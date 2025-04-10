@@ -15,52 +15,54 @@ This project solves the nurse rostering (scheduling) problem using **constraint 
 
 ### 0. Clone the Repository
 
-git clone git@github.com:qghrjf645/Nurse-Rostering-Problem.git
-cd Nurse-Rostering-Problem
+`git clone git@github.com:qghrjf645/Nurse-Rostering-Problem.git`
+`cd Nurse-Rostering-Problem`
 
-1. Set Up a Virtual Environment (Recommended)
+### 1. Set Up a Virtual Environment (Recommended)
 
-python2 -m venv .venv
-source .venv/bin/activate        # On Windows: .venv\Scripts\activate
+`python2 -m venv .venv`
+`source .venv/bin/activate`
+On Windows:
+ `.venv\Scripts\activate`
 
-2. Install Dependencies
+### 2. Install Dependencies
 
-pip install -r requirements.txt
+`pip install -r requirements.txt`
 
-🔐 API Key Configuration
+#### 🔐 API Key Configuration
 
-To use OpenAI's conversational agent for preference collection, create a .env file in the project root:
+To use OpenAI's conversational agent for preference collection, create a `.env` file in the project root:
 
-# .env
-export OPENAI_API_KEY=your_openai_api_key
+### Environment variables
+`export OPENAI_API_KEY=your_openai_api_key`
 
 Then load it into your environment before running the script:
 
-source .env
+`source .env`
 
-🧠 How to Use
-▶️ Run the Main Solver
+# 🧠 How to Use
+## ▶️ Run the Main Solver
 
 The main Python script that orchestrates everything (data collection, parsing, solving) is:
 
-python src/complete_solver.py
+`python src/complete_solver.py`
 
 This will launch an interactive assistant to gather problem parameters and solve the rostering problem accordingly.
-📓 Explore the Notebook
+## 📓 Explore the Notebook
 
 For an interactive, documented walkthrough of the methodology and solution:
 
-jupyter notebook notebooks/OR_Tools.ipynb
+`jupyter notebook notebooks/OR_Tools.ipynb`
 
-💬 Example Prompts
+## 💬 Example Prompts
 
 You can find example conversation prompts to use with the AI agent in:
 
-utils/example_prompt.txt
+`utils/example_prompt.txt`
 
 These can help you structure realistic and useful input for the assistant (e.g., preferences for nurses, constraints, etc.).
 
-🧾 Requirements
+## 🧾 Requirements
 
 This project uses Python 2.8+ and the following key packages:
 
